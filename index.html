@@ -1,0 +1,47 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>WLW Wordle</title>
+    <style>
+      body {
+        background-color: #111;
+        color: white;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .header {
+        font-size: 2rem;
+        margin-bottom: 10px;
+      }
+      .word-display {
+        font-size: 1.5rem;
+        padding: 1rem;
+        border: 1px dashed white;
+        background-color: #222;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">WLW Wordle</div>
+    <div id="game" class="word-display">Loading word...</div>
+
+    <script>
+      const params = new URLSearchParams(window.location.search);
+      const ascii = params.get("word");
+      if (ascii) {
+        const letters = ascii.split('-').map(n => String.fromCharCode(parseInt(n)));
+        document.getElementById("game").innerText = "Today's word is: " + letters.join('');
+      } else {
+        document.getElementById("game").innerText = "No word provided in URL.";
+      }
+    </script>
+  </body>
+</html>

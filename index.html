@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WLW Wordle</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #111;
+      color: white;
+      font-family: sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 20px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .row {
+      display: contents;
+    }
+
+    .tile {
+      width: 60px;
+      height: 60px;
+      background-color: #222;
+      border: 2px solid #555;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2rem;
+      text-transform: uppercase;
+    }
+
+    .correct {
+      background-color: #6aaa64;
+    }
+
+    .present {
+      background-color: #c9b458;
+    }
+
+    .absent {
+      background-color: #3a3a3c;
+    }
+
+    .keyboard {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 400px;
+    }
+
+    .key {
+      background-color: #333;
+      color: white;
+      border: none;
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+
+    #message {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>WLW Wordle</h1>
+  <div id="grid"></div>
+  <div class="keyboard" id="keyboard"></div>
+  <div id="message"></div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    const ascii = params.get("word");
+    const target = ascii
+      ? ascii.split("-").map(n => String.fromCharCode(parseInt(n))).join("").toLowerCase()
+      : "twine";
+
+    const maxGuesses = 6;
+    let currentGuess = "";
+    let guesses = [];
+
+    const grid = document.getElementById("grid");
+    const keyboard = document.getElementById("keyboard");
+    const message = document.getElementById("message");
+
+    function createGrid() {
+      grid.innerHTML = "";
+      for (let i = 0; i < maxGuesses; i++) {
+        const row = document.createElement("div");
+        row.classList.add("row");
+        for (let j = 0; j < 5; j++) {
+          const tile = document.createElement("div");
+          tile.classList.add("tile");
+          tile.id = `tile-${i}-${j}`;
+          row.appendChild(tile);
+        }
+        grid.appendChild(row);
+      }
+    }
+
+    function createKeyboard() {
+      const keys = "QWERTYUIOPASDFGHJKLZXCVBNM".split("");
+      keys.forEach(k => {
+        const key = document.createElement("button");
+        key.textContent = k;
+        key.className = "key";
+        key.onclick = () => handleKey(k.toLowerCase());
+        keyboard.appendChild(key);
+      });
+
+      const enter = document.createElement("button");
+      enter.textContent = "Enter";
+      enter.className = "key";
+      enter.onclick = () => submitGuess();
+      keyboard.appendChild(enter);
+
+      const del = document.createElement("button");
+      del.textContent = "⌫";
+      del.className = "key";
+      del.onclick = () => deleteChar();
+      keyboard.appendChild(del);
+    }
+
+    function handleKey(letter) {
+      if (currentGuess.length < 5) {
+        currentGuess += letter;
+        updateGrid();
+      }
+    }
+
+    function deleteChar() {
+      currentGuess = currentGuess.slice(0, -1);
+      updateGrid();
+    }
+
+    function updateGrid() {
+      const row = guesses.length;
+      for (let i = 0; i < 5; i++) {
+        const tile = document.getElementById(`tile-${row}-${i}`);
+        tile.textContent = currentGuess[i] || "";
+      }
+    }
+
+    function submitGuess() {
+      if (currentGuess.length !== 5) {
+        message.textContent = "Not enough letters!";
+        return;
+      }
+
+      const row = guesses.length;
+      const result = [];
+
+      for (let i = 0; i < 5; i++) {
+        if (currentGuess[i] === target[i]) {
+          result.push("correct");
+        } else if (target.includes(currentGuess[i])) {
+          result.push("present");
+        } else {
+          result.push("absent");
+        }
+      }
+
+      for (let i = 0; i < 5; i++) {
+        const tile = document.getElementById(`tile-${row}-${i}`);
+        tile.classList.add(result[i]);
+      }
+
+      guesses.push(currentGuess);
+
+      if (currentGuess === target) {
+        message.textContent = "🎉 You got it!";
+      } else if (guesses.length === maxGuesses) {
+        message.textContent = `The word was: ${target}`;
+      } else {
+        message.textContent = "";
+      }
+
+      currentGuess = "";
+    }
+
+    createGrid();
+    createKeyboard();
+  </script>
+</body>
+</html>

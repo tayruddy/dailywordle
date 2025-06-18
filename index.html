@@ -1,56 +1,148 @@
 
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>WLW Wordle</title>
-    <script defer src="https://apps.4sitestudios.com/wordle-for-good/wordle-for-good.js"></script>
-    <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        background: #111;
-        color: #fff;
-        font-family: sans-serif;
-        text-align: center;
-        height: 100%;
-        overflow: hidden;
-      }
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>WLW Wordle</title>
+  <style>
+    body {
+      background-color: #1a1a1a;
+      color: #fefefe;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: start;
+      height: 100vh;
+      margin: 0;
+      padding-top: 40px;
+    }
 
-      .header {
-        font-size: 2rem;
-        font-weight: bold;
-        margin: 0;
-        padding: 10px 0;
-      }
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
 
-      wordle-for-good h1 {
-        display: none !important;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="header">WLW Wordle</div>
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 60px);
+      gap: 10px;
+      margin-bottom: 20px;
+    }
 
-    <wordle-for-good
-      id="game"
-      word=""
-      tile-bg-correct-color="#6aaa64"
-      tile-bg-wrong-location-color="#c9b458"
-      tile-bg-incorrect-color="#787c7e"
-      text-color="#ffffff"
-      bg-color="#111111"
-      keyboard-style="rounded"
-      tile-size="60"
-    ></wordle-for-good>
+    .tile {
+      width: 60px;
+      height: 60px;
+      border: 2px solid #555;
+      font-size: 2rem;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #2a2a2a;
+      color: #fff;
+    }
 
-    <script>
+    .correct {
+      background-color: #6aaa64;
+    }
+
+    .present {
+      background-color: #c9b458;
+    }
+
+    .absent {
+      background-color: #555;
+    }
+
+    input {
+      padding: 10px;
+      font-size: 1rem;
+      width: 150px;
+      text-transform: uppercase;
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #6aaa64;
+      color: white;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+
+    .message {
+      margin-top: 15px;
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>WLW Wordle</h1>
+  <div class="grid" id="grid">
+    <div class="tile"></div>
+    <div class="tile"></div>
+    <div class="tile"></div>
+    <div class="tile"></div>
+    <div class="tile"></div>
+  </div>
+  <input type="text" maxlength="5" id="guess" placeholder="Your guess" autofocus />
+  <button onclick="checkGuess()">Submit</button>
+  <div class="message" id="message"></div>
+
+  <script>
+    const getWordFromParam = () => {
       const params = new URLSearchParams(window.location.search);
-      const word = params.get("word");
-      const game = document.getElementById("game");
-      if (word) {
-        game.setAttribute("word", word);
+      const ascii = params.get("word");
+      if (!ascii) return null;
+      return ascii.split("-").map(n => String.fromCharCode(parseInt(n))).join("");
+    };
+
+    const word = getWordFromParam();
+    const today = new Date().toISOString().split("T")[0];
+    const lastPlayed = localStorage.getItem("wlw-wordle-last-played");
+
+    if (lastPlayed === today) {
+      document.getElementById("message").innerText = "You've already played today 🌈 Come back tomorrow!";
+      document.querySelector("button").disabled = true;
+      document.querySelector("input").disabled = true;
+    }
+
+    const checkGuess = () => {
+      const input = document.getElementById("guess");
+      const guess = input.value.toLowerCase();
+      if (guess.length !== 5 || !/^[a-zA-Z]+$/.test(guess)) {
+        alert("Please enter a 5-letter word.");
+        return;
       }
-    </script>
-  </body>
+
+      const tiles = document.querySelectorAll(".tile");
+      for (let i = 0; i < 5; i++) {
+        tiles[i].innerText = guess[i].toUpperCase();
+        if (guess[i] === word[i]) {
+          tiles[i].className = "tile correct";
+        } else if (word.includes(guess[i])) {
+          tiles[i].className = "tile present";
+        } else {
+          tiles[i].className = "tile absent";
+        }
+      }
+
+      if (guess === word) {
+        document.getElementById("message").innerText = "🎉 You got it!";
+        localStorage.setItem("wlw-wordle-last-played", today);
+        document.querySelector("button").disabled = true;
+        document.querySelector("input").disabled = true;
+      } else {
+        document.getElementById("message").innerText = "Try again tomorrow! The word was: " + word.toUpperCase();
+        localStorage.setItem("wlw-wordle-last-played", today);
+        document.querySelector("button").disabled = true;
+        document.querySelector("input").disabled = true;
+      }
+    };
+  </script>
+</body>
 </html>

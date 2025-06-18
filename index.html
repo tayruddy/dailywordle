@@ -25,6 +25,7 @@
 
     .grid {
       display: grid;
+      grid-template-rows: repeat(5, 60px);
       grid-template-columns: repeat(5, 60px);
       gap: 10px;
       margin-bottom: 20px;
@@ -82,13 +83,7 @@
 </head>
 <body>
   <h1>WLW Wordle</h1>
-  <div class="grid" id="grid">
-    <div class="tile"></div>
-    <div class="tile"></div>
-    <div class="tile"></div>
-    <div class="tile"></div>
-    <div class="tile"></div>
-  </div>
+  <div class="grid" id="grid"></div>
   <input type="text" maxlength="5" id="guess" placeholder="Your guess" autofocus />
   <button onclick="checkGuess()">Submit</button>
   <div class="message" id="message"></div>
@@ -105,43 +100,61 @@
     const today = new Date().toISOString().split("T")[0];
     const lastPlayed = localStorage.getItem("wlw-wordle-last-played");
 
-    if (lastPlayed === today) {
-      document.getElementById("message").innerText = "You've already played today 🌈 Come back tomorrow!";
-      document.querySelector("button").disabled = true;
-      document.querySelector("input").disabled = true;
+    const grid = document.getElementById("grid");
+    for (let i = 0; i < 25; i++) {
+      const tile = document.createElement("div");
+      tile.className = "tile";
+      grid.appendChild(tile);
     }
 
+    const message = document.getElementById("message");
+    const input = document.getElementById("guess");
+    const button = document.querySelector("button");
+
+    if (lastPlayed === today) {
+      message.innerText = "You've already played today 🌈 Come back tomorrow!";
+      input.disabled = true;
+      button.disabled = true;
+    }
+
+    let attempt = 0;
+
     const checkGuess = () => {
-      const input = document.getElementById("guess");
       const guess = input.value.toLowerCase();
       if (guess.length !== 5 || !/^[a-zA-Z]+$/.test(guess)) {
         alert("Please enter a 5-letter word.");
         return;
       }
 
-      const tiles = document.querySelectorAll(".tile");
+      const startIdx = attempt * 5;
       for (let i = 0; i < 5; i++) {
-        tiles[i].innerText = guess[i].toUpperCase();
+        const tile = grid.children[startIdx + i];
+        tile.innerText = guess[i].toUpperCase();
         if (guess[i] === word[i]) {
-          tiles[i].className = "tile correct";
+          tile.className = "tile correct";
         } else if (word.includes(guess[i])) {
-          tiles[i].className = "tile present";
+          tile.className = "tile present";
         } else {
-          tiles[i].className = "tile absent";
+          tile.className = "tile absent";
         }
       }
 
       if (guess === word) {
-        document.getElementById("message").innerText = "🎉 You got it!";
+        message.innerText = "🎉 You got it!";
+        input.disabled = true;
+        button.disabled = true;
         localStorage.setItem("wlw-wordle-last-played", today);
-        document.querySelector("button").disabled = true;
-        document.querySelector("input").disabled = true;
       } else {
-        document.getElementById("message").innerText = "Try again tomorrow! The word was: " + word.toUpperCase();
-        localStorage.setItem("wlw-wordle-last-played", today);
-        document.querySelector("button").disabled = true;
-        document.querySelector("input").disabled = true;
+        attempt++;
+        if (attempt >= 5) {
+          message.innerText = "Out of tries! The word was: " + word.toUpperCase();
+          input.disabled = true;
+          button.disabled = true;
+          localStorage.setItem("wlw-wordle-last-played", today);
+        }
       }
+
+      input.value = "";
     };
   </script>
 </body>

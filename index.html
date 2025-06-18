@@ -82,7 +82,6 @@
         gameEl.setAttribute("word", word);
       }
 
-      // Fallback method: check for visible game message like “🎉 You got it!”
       const observer = new MutationObserver(() => {
         const bodyText = document.body.innerText;
         if (bodyText.includes("🎉 You got it")) {

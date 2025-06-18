@@ -1,0 +1,98 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>WLW Wordle</title>
+    <script defer src="https://apps.4sitestudios.com/wordle-for-good/wordle-for-good.js"></script>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #111;
+        color: #fff;
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        text-align: center;
+      }
+
+      .header {
+        font-size: 2rem;
+        font-weight: bold;
+        margin-bottom: 20px;
+      }
+
+      .message {
+        font-size: 1.2rem;
+        padding: 20px;
+        background: #222;
+        border: 1px solid #444;
+        border-radius: 10px;
+      }
+
+      wordle-for-good {
+        display: none;
+      }
+
+      #game.active wordle-for-good {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="header">WLW Wordle</div>
+    <div id="game">
+      <div class="message" id="message" style="display:none;">
+        You've already played today, queen. Come back tomorrow. 💅
+      </div>
+
+      <wordle-for-good
+        id="wordle"
+        word=""
+        tile-bg-correct-color="#6aaa64"
+        tile-bg-wrong-location-color="#c9b458"
+        tile-bg-incorrect-color="#787c7e"
+        text-color="#ffffff"
+        bg-color="#111111"
+        keyboard-style="rounded"
+        tile-size="60"
+      ></wordle-for-good>
+    </div>
+
+    <script>
+      const today = new Date().toISOString().split("T")[0];
+      const lastPlayed = localStorage.getItem("lastPlayedDate");
+      const message = document.getElementById("message");
+      const gameContainer = document.getElementById("game");
+
+      if (lastPlayed === today) {
+        message.style.display = "block";
+      } else {
+        gameContainer.classList.add("active");
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const word = params.get("word");
+      const gameEl = document.getElementById("wordle");
+      if (word) {
+        gameEl.setAttribute("word", word);
+      }
+
+      // Use MutationObserver to detect game end
+      const observer = new MutationObserver(() => {
+        const text = document.body.innerText;
+        if (text.includes("You Win") || text.includes("The word was")) {
+          localStorage.setItem("lastPlayedDate", today);
+          observer.disconnect();
+          setTimeout(() => location.reload(), 2000);
+        }
+      });
+
+      observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+  </body>
+</html>

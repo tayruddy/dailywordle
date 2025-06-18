@@ -6,9 +6,9 @@
   <title>WLW Wordle</title>
   <style>
     body {
-      background-color: #1a1a1a;
-      color: #fefefe;
-      font-family: 'Segoe UI', sans-serif;
+      background-color: transparent;
+      color: #fff8f8;
+      font-family: "Segoe UI", "Papyrus", "Comic Sans MS", cursive;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -19,6 +19,8 @@
     }
 
     h1 {
+  text-shadow: 1px 1px 4px #f0f;
+  letter-spacing: 1px;
       font-size: 2rem;
       margin-bottom: 20px;
     }
@@ -32,6 +34,8 @@
     }
 
     .tile {
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.2);
       width: 60px;
       height: 60px;
       border: 2px solid #555;
